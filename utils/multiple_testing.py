@@ -7,6 +7,24 @@ import copy
 from collections import *
 
 #####
+def p_function_static(score_matrix, cal_weights, test_weights, U=1): 
+    m, total = score_matrix.shape
+    n = total - m
+
+    numer = np.inf * np.ones(m)
+
+    sum_cal_weights = sum(cal_weights)
+    denom = test_weights + sum_cal_weights    # this is a m-dim array 
+    for j in range(m):
+        cal_scores = score_matrix[j,:n]
+        test_scores = score_matrix[j,n:]
+
+        numer[j] = sum(cal_weights * (cal_scores >= test_scores[j]) ) + test_weights[j] * U
+
+    p = numer / denom
+    return p 
+
+
 def base_e_function(alpha, scores, n):
     '''
     Computes e-values, while maintaining .
