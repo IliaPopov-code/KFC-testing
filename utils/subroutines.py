@@ -25,26 +25,13 @@ def compute_beta(n, m, K_blocks):
     result = (n + m) / (n + B_k_size) * np.log((1 - epsilon) / (B_k_size * epsilon))
     return result
 
-def subroutine(classifier, Xref, Xtest, blocks):
-
-    """
-    Given a classifier and both the reference and the test dataset, as well as number of blocks outputs the non-conformity scores. 
-        
-        Parameters:
-            classifier : Classification object.
-            Xref : Reference dataset.
-            Xtest : Testing dataset.
-            
-        Returns:
-            scores: A vector of non-conformity scores
-    """
-
+def subroutine(classifier, Xref, Xtest, blocks, negate_scores=True):
     m = Xtest.shape[0]
     n = Xref.shape[0]
     
     scores = np.zeros(shape=(m,n+m))
     if len(blocks)==1:
-        # 1-FC: this is just the default full conformal, without leave-one-out training
+        # 1-FC: this is just the defaul full conformal, without leave-one-out training
         Xaugmented = np.vstack((Xref, Xtest))
         
         # train on the ref+test dataset
@@ -56,10 +43,12 @@ def subroutine(classifier, Xref, Xtest, blocks):
         # since we only have 1 block, only one distinct row in the conformity score matrix
         scores = np.tile(score_samples, (m, 1))
         
-        return -1 * scores
+        return (-1 if negate_scores else 1) * scores
     
     for block_idx, block in enumerate(blocks):
-        Xaugmented = np.vstack((Xref, Xtest[block]))
+        # for j in block:
+        #     test_point = Xtest[j] 
+        Xaugmented = np.vstack( (Xref, Xtest[block]) )
 
         # train on the augmented dataset
         classifier.fit(Xaugmented)
@@ -76,6 +65,7 @@ def subroutine(classifier, Xref, Xtest, blocks):
         # D_test[-block] last
         all_but_block = np.setdiff1d(range(m), block)
         test_scores[all_but_block] = classifier.score_samples(Xtest[all_but_block]).flatten()
+        
         scores[block,n:] = test_scores
         
     return -1 * scores

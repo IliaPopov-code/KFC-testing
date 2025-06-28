@@ -7,9 +7,9 @@ Specifically, this is the collection of data-generating functions used for their
 simulation.
 """
 
-def gen_data(Wset, n, a): 
-    Wi = Wset[np.random.choice(range(50), n),:]
-    Vi = np.random.normal(size=n*50).reshape((n,50))
+def gen_data(Wset, n, a, dimension = 50): 
+    Wi = Wset[np.random.choice(range(dimension), n),:]
+    Vi = np.random.normal(size=n*dimension).reshape((n,dimension))
     Xi = np.sqrt(a) * Vi + Wi
     return(Xi)
     
